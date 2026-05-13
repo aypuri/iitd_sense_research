@@ -39,8 +39,6 @@ SeNSE research/
 │   └── v3/
 ├── figures/
 ├── Chess_Board_8by8.jpg
-├── paper.tex
-├── .gitignore
 └── README.md
 ```
 
@@ -161,15 +159,6 @@ Static plots generated during analysis, included in the repository.
 
 ---
 
-## Other Files
-
-| File | Description |
-|---|---|
-| `paper.tex` | LaTeX source for the conference paper. Compile with `pdflatex paper.tex`. Figures are referenced from the `figures/` directory. |
-| `Chess_Board_8by8.jpg` | Checkerboard image used for camera calibration. |
-| `.gitignore` | Excludes `opencv/`, all `.pkl` files, two oversized videos (>100 MB), and Python cache files. |
-
----
 
 ## Running the Scripts
 
