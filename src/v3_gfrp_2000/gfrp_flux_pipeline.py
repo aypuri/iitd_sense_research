@@ -9,14 +9,14 @@ import pickle
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'data', 'v3')
 
-cap = cv.VideoCapture(os.path.join(DATA_DIR, 'new_gfrp_2000_flux.avi'))
+cap = cv.VideoCapture(os.path.join(DATA_DIR, 'gfrp_flux_raw.avi'))
 FRAMES = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
 HEIGHT = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
 WIDTH = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
 CORRSIZE = 2*FRAMES - 1
 
 def plotPixelIntensity(x,y):
-    cap = cv.VideoCapture(os.path.join(DATA_DIR, '160ogdisc_fourcorr.mp4'))
+    cap = cv.VideoCapture(os.path.join(DATA_DIR, 'gfrp_flux_fft_phase_mainlobe_disc160.mp4'))
     intensityValues = []
 
 
@@ -42,7 +42,7 @@ def plotPixelIntensity(x,y):
     cv.destroyAllWindows()
 
 def displayFrame(frameNumber):
-    cap = cv.VideoCapture(os.path.join(DATA_DIR, 'fourier_output_norm.mp4'))
+    cap = cv.VideoCapture(os.path.join(DATA_DIR, 'gfrp_flux_fft_phase_normalised.mp4'))
     cap.set(cv.CAP_PROP_POS_FRAMES, frameNumber - 1)
     ret, frame = cap.read()
     if not ret:
@@ -57,7 +57,7 @@ def displayFrame(frameNumber):
     menu()
 
 def cropVideo(x1, y1, x2, y2):
-    cap = cv.VideoCapture(os.path.join(DATA_DIR, 'new_gfrp_2000_flux.avi'))
+    cap = cv.VideoCapture(os.path.join(DATA_DIR, 'gfrp_flux_raw.avi'))
 
     fourcc = cv.VideoWriter_fourcc(*'XVID')
     out = cv.VideoWriter(os.path.join(DATA_DIR, 'cropped_output.avi'), fourcc, 25.0, (573, 459), isColor=False)
@@ -115,7 +115,7 @@ def detrendPixelIntensities(frames, x, y):
 
 
 def displayDetrendedVideo(display_or_save):
-    cap = cv.VideoCapture(os.path.join(DATA_DIR, 'new_gfrp_2000_flux.avi'))
+    cap = cv.VideoCapture(os.path.join(DATA_DIR, 'gfrp_flux_raw.avi'))
     # 3D array filled with zeroes
     detrended3Dmatrix = np.zeros((FRAMES, HEIGHT, WIDTH), dtype=np.float64)
 

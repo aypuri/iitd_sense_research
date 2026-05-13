@@ -9,7 +9,7 @@ import pickle
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'data', 'v2')
 
-cap = cv.VideoCapture(os.path.join(DATA_DIR, 'gfrp_AP.avi'))
+cap = cv.VideoCapture(os.path.join(DATA_DIR, 'gfrp_ap_raw.avi'))
 FRAMES = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
 HEIGHT = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
 WIDTH = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
@@ -41,7 +41,7 @@ def plotPixelIntensity(x,y):
     cv.destroyAllWindows()
 
 def displayFrame(frameNumber):
-    cap = cv.VideoCapture(os.path.join(DATA_DIR, 'gfrp_AP.avi'))
+    cap = cv.VideoCapture(os.path.join(DATA_DIR, 'gfrp_ap_raw.avi'))
     cap.set(cv.CAP_PROP_POS_FRAMES, frameNumber - 1)
     ret, frame = cap.read()
     if not ret:
@@ -56,7 +56,7 @@ def displayFrame(frameNumber):
     menu()
 
 def cropVideo(x1, y1, x2, y2):
-    cap = cv.VideoCapture(os.path.join(DATA_DIR, 'gfrp_AP.avi'))
+    cap = cv.VideoCapture(os.path.join(DATA_DIR, 'gfrp_ap_raw.avi'))
 
     fourcc = cv.VideoWriter_fourcc(*'XVID')
     out = cv.VideoWriter(os.path.join(DATA_DIR, 'output.avi'), fourcc, 25.0, (460, 460), isColor=False)
@@ -114,7 +114,7 @@ def detrendPixelIntensities(frames, x, y):
 
 
 def displayDetrendedVideo(display_or_save):
-    cap = cv.VideoCapture(os.path.join(DATA_DIR, 'gfrp_AP_og.avi'))
+    cap = cv.VideoCapture(os.path.join(DATA_DIR, 'gfrp_ap_raw.avi'))
     # 3D array filled with zeroes
     detrended3Dmatrix = np.zeros((FRAMES, HEIGHT, WIDTH), dtype=np.float64)
 
@@ -367,14 +367,41 @@ def displayCroppedCorrelationMatrix(display_or_save):
             out.release()
             cv.destroyAllWindows()
         elif selection == 2:
-            #x = int(input("Enter the x-coordinate of the pixel (from 0 to 168): ")) 
-            #y = int(input("Enter the y-coordinate of the pixel (from 0 to 288): "))
             plt.plot(corrDiscMatrix[:, 115, 115])
             plt.plot(corrDiscMatrix[:, 230, 230])
             plt.plot(corrDiscMatrix[:, 175, 175])
             plt.legend([f'defect (115, 115)', f'defect (230, 230)', f'sound (175, 175)'])
             plt.show()
-    
+
+    elif display_or_save == 'fft':
+        fourier3Dmatrix = np.zeros((210, HEIGHT-1, WIDTH-1), dtype=np.float64)
+        for y in range(HEIGHT-1):
+            for x in range(WIDTH-1):
+                fourier3Dmatrix[:, y, x] = np.angle(np.fft.fft(croppedCorrMatrix[:, y, x]))
+        selection = int(input("save or plot? (1 or 2): "))
+        if selection == 1:
+            norm = cv.normalize(fourier3Dmatrix, None, 0, 255, cv.NORM_MINMAX).astype(np.uint8)
+            fourcc = cv.VideoWriter_fourcc(*'mp4v')
+            out = cv.VideoWriter(os.path.join(DATA_DIR, 'gfrp_ap_fft_phase_mainlobe.mp4'), fourcc, 25.0, (WIDTH-1, HEIGHT-1), isColor=False)
+            for i in range(210):
+                out.write(norm[i])
+            out.release()
+            cv.destroyAllWindows()
+        elif selection == 2:
+            fig, ax = plt.subplots(figsize=(7, 4))
+            ax.plot(fourier3Dmatrix[:105, 115, 115], label='defect (115, 115)')
+            ax.plot(fourier3Dmatrix[:105, 230, 230], label='defect (230, 230)')
+            ax.plot(fourier3Dmatrix[:105, 175, 175], label='sound (175, 175)', linestyle='--')
+            ax.set_xlabel('Frequency bin $k$')
+            ax.set_ylabel('Phase (rad)')
+            ax.set_title('FFT Phase — GFRP AP Correlation Main Lobe')
+            ax.legend()
+            ax.grid(True, alpha=0.3)
+            fig.tight_layout()
+            FIGURES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'figures')
+            fig.savefig(os.path.join(FIGURES_DIR, 'gfrp_ap_fft_phase_defect_vs_sound.png'), dpi=150)
+            plt.show()
+
 def cropMainLobe():
     cap = cv.VideoCapture(os.path.join(DATA_DIR, '1010_2020_4039_disccorr.mp4'))
     ret, frame = cap.read()
